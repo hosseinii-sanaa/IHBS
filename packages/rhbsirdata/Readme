@@ -1,1 +1,51 @@
+** access to raw Iranian Household Income and Expenditure Survey (HIES) data**  
+from 1363 to 1402 (1984–2024) – published by the Statistical Center of Iran.
+ Installation
+# Install the latest version
+remotes::install_github("hoseinii-sanaa/IHBS/packages/rhbsirdata")
+library(rhbsirdata)
 
+Usage Examples
+ 1. Load raw expenditure data (full detail)
+d1 <- load_expenditure(1390, summarise = FALSE)
+head(d1)
+ 2. Load summarized income data at household level
+d2 <- load_income(1399, summarise = TRUE)
+head(d2)
+ 3. Add final household weights
+d3 <- hbsir.add_weight(d2)
+head(d3)
+ 4. Add demographic attributes (province, urban/rural, etc.)
+d4 <- hbsir.add_attributes(d3)
+head(d4)
+ 5. Add commodity classification (COICOP)
+d5 <- load_expenditure(1370, summarise = FALSE)
+d5 <- hbsir.add_classification(d5,
+                               code_col = "Commodity_Code",
+                               classification_type = "commodity")
+head(d5)
+ 6. Add industry & occupation classification (ISIC / ISCO)
+d6 <- load_income(1380, summarise = FALSE)
+d6 <- hbsir.add_classification(d6, code_col = "Industry_Code",   classification_type = "industry")
+d6 <- hbsir.add_classification(d6, code_col = "Occupation_Code", classification_type = "occupation")
+head(d6)
+ 7. Add income percentiles, deciles, and quantiles
+d7 <- hbsir_add_percentile_decile_quantile(d2, column = "Gross_Income")
+head(d7)
+ 8. Add expenditure percentiles/deciles
+d8 <- hbsir_add_percentile_decile_quantile(d1, column = "Gross_Expenditure")
+head(d8)
+
+Available Years
+1363–1402 (1984–2024) – both income and expenditure surveys.
+
+Key Features:
+Local caching (never re-downloads the same year)
+Full compatibility with dplyr, arrow, data.table
+Helper functions for weights, classifications, and inequality measures
+Clean, documented, and CRAN-ready code
+
+For Contributors & Team Use
+This package lives inside the internal IHBS monorepo at:
+packages/rhbsirdata/
+Feel free to update, improve documentation, or add new helper functions!

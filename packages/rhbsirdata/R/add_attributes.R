@@ -11,18 +11,13 @@
 #' @importFrom arrow read_parquet
 hbsir.add_attributes <- function(df) {
   df$ID <- as.character(df$ID)
-  #Load external data with error handling
-  external_url <- "https://s3.ir-tbz-sh1.arvanstorage.ir/iran-open-data/EXTERNAL/hbsir_counties.parquet"
-  tryCatch({
-    external_data <- arrow::read_parquet(external_url)
-  }, error = function(e) {
-    stop("Failed to load external data: ", e$message)
-  })
-  #Check required columns in external_data
-  if (!all(c("ID", "Region_Code") %in% colnames(external_data))) {
-    stop("External data is missing required columns: ID, Region_Code")
+
+  # Ensure 'ID' has no missing values
+  if (any(is.na(df$ID))) {
+    stop("The 'ID' column contains missing values.")
   }
-  #Define province codes and corresponding names
+
+  # Define province codes and corresponding names
   province_codes <- c(
     "00" = "Markazi", "01" = "Gilan", "02" = "Mazandaran",
     "03" = "East_Azerbaijan", "04" = "West_Azerbaijan", "05" = "Kermanshah",
@@ -34,7 +29,8 @@ hbsir.add_attributes <- function(df) {
     "23" = "Tehran", "24" = "Ardabil", "25" = "Qom", "26" = "Qazvin",
     "27" = "Golestan", "28" = "North_Khorasan", "29" = "South_Khorasan", "30" = "Alborz"
   )
-  #Define the county codes and corresponding names based on the provided data
+
+  # Define the county codes and corresponding names based on the provided data
   county_codes <- c(
     "0001" = "Arak",
     "0002" = "Ashtian",
@@ -137,7 +133,6 @@ hbsir.add_attributes <- function(df) {
     "0512" = "Solas-e-Babajani",
     "0513" = "Dalaho",
     "0514" = "Ravansar",
-    # Khuzestan
     "0601" = "Abadan",
     "0602" = "Andimeshk",
     "0603" = "Ahvaz",
@@ -165,8 +160,6 @@ hbsir.add_attributes <- function(df) {
     "0625" = "Hamidieh",
     "0626" = "Aghajari",
     "0627" = "Karoun",
-
-    # Fars
     "0701" = "Abadeh",
     "0702" = "Estahban",
     "0703" = "Eqlid",
@@ -196,8 +189,6 @@ hbsir.add_attributes <- function(df) {
     "0727" = "Gerash",
     "0728" = "Kavar",
     "0729" = "Kherameh",
-
-    # Kerman
     "0801" = "Baft",
     "0802" = "Bam",
     "0803" = "Jiroft",
@@ -221,7 +212,6 @@ hbsir.add_attributes <- function(df) {
     "0821" = "Normashir",
     "0822" = "Faryab",
     "0823" = "Arzuiyeh",
-    # Razavi Khorasan
     "0901" = "Esfarayen",
     "0902" = "Bojnurd",
     "0903" = "Birjand",
@@ -260,8 +250,6 @@ hbsir.add_attributes <- function(df) {
     "0937" = "Bakharz",
     "0938" = "Khoshab",
     "0939" = "Davarzan",
-
-    # Isfahan
     "1001" = "Ardestan",
     "1002" = "Isfahan",
     "1003" = "Khomeinishahr",
@@ -305,7 +293,6 @@ hbsir.add_attributes <- function(df) {
     "1117" = "Mirjaveh",
     "1118" = "Ghasre_Ghand",
     "1119" = "Fanouj",
-
     "1201" = "Baneh",
     "1202" = "Bijar",
     "1203" = "Saqqez",
@@ -316,7 +303,6 @@ hbsir.add_attributes <- function(df) {
     "1208" = "Kamyaran",
     "1209" = "Sarvabad",
     "1210" = "Dehgolan",
-    # Hamadan Province
     "1301" = "Tuyserkan",
     "1302" = "Malayer",
     "1303" = "Nahavand",
@@ -326,8 +312,6 @@ hbsir.add_attributes <- function(df) {
     "1307" = "Bahar",
     "1308" = "Razan",
     "1309" = "Famenin",
-
-    # Chaharmahal and Bakhtiari Province
     "1401" = "Borujen",
     "1402" = "Shahrekord",
     "1403" = "Farsan",
@@ -337,8 +321,6 @@ hbsir.add_attributes <- function(df) {
     "1407" = "Kiaar",
     "1408" = "Saman",
     "1409" = "Ben",
-
-    # Lorestan Province
     "1501" = "Aligudarz",
     "1502" = "Borujerd",
     "1503" = "Khorramabad",
@@ -350,8 +332,6 @@ hbsir.add_attributes <- function(df) {
     "1509" = "Selseleh",
     "1510" = "Doureh",
     "1511" = "Romeshkan",
-
-    # Ilam Province
     "1601" = "Ilam",
     "1602" = "Darreh Shahr",
     "1603" = "Dehloran",
@@ -362,18 +342,14 @@ hbsir.add_attributes <- function(df) {
     "1608" = "Malekshahi",
     "1609" = "Sirvan",
     "1610" = "Badre",
-
-    # Kohgiluyeh and Boyer-Ahmad Province
     "1701" = "Boyer-Ahmad",
     "1702" = "Kohgeluyeh",
     "1703" = "Gachsaran",
-    "1704" = "Dena", #
+    "1704" = "Dena",
     "1705" = "Bahmai",
     "1706" = "Charam",
     "1707" = "Basht",
     "1708" = "Landeh",
-
-    # Bushehr Province
     "1801" = "Bushehr",
     "1802" = "Tangestan",
     "1803" = "Dashtestan",
@@ -384,8 +360,6 @@ hbsir.add_attributes <- function(df) {
     "1808" = "Deylam",
     "1809" = "Jam",
     "1810" = "Asaluyeh",
-
-    # Zanjan Province
     "1901" = "Abhar",
     "1903" = "Khodabandeh",
     "1904" = "Zanjan",
@@ -394,8 +368,6 @@ hbsir.add_attributes <- function(df) {
     "1908" = "Tarom",
     "1909" = "Mahneshan",
     "1910" = "Soltanieh",
-
-    # Semnan Province
     "2001" = "Damghan",
     "2002" = "Semnan",
     "2003" = "Shahrud",
@@ -404,7 +376,6 @@ hbsir.add_attributes <- function(df) {
     "2006" = "Aradan",
     "2007" = "Meyami",
     "2008" = "Sorkheh",
-    # Yazd Province
     "2101" = "Ardekan",
     "2102" = "Bafq",
     "2103" = "Taft",
@@ -416,7 +387,6 @@ hbsir.add_attributes <- function(df) {
     "2109" = "Khatam",
     "2110" = "Tabas",
     "2111" = "Bahabad",
-    # Hormozgan Province
     "2201" = "Abumusa",
     "2202" = "Bandar-Lengeh",
     "2203" = "Bandar-Abbas",
@@ -430,7 +400,6 @@ hbsir.add_attributes <- function(df) {
     "2211" = "Parsian",
     "2212" = "Sirik",
     "2213" = "Bashagard",
-    # Tehran Province
     "2301" = "Tehran",
     "2302" = "Damavand",
     "2303" = "Rey",
@@ -450,7 +419,6 @@ hbsir.add_attributes <- function(df) {
     "2319" = "Baharestan",
     "2320" = "Pardis",
     "2321" = "Qarchak",
-    # Ardabil Province
     "2401" = "Ardabil",
     "2402" = "Bilasavar",
     "2403" = "Khalkhal",
@@ -461,16 +429,13 @@ hbsir.add_attributes <- function(df) {
     "2408" = "Namin",
     "2409" = "Nir",
     "2410" = "Sareyn",
-    # Qom Province
     "2501" = "Qom",
-    # Qazvin Province
     "2601" = "Buin-Zahra",
     "2602" = "Takestan",
     "2603" = "Qazvin",
     "2604" = "Abyek",
     "2605" = "Alborz",
     "2606" = "Avaj",
-    # Golestan Province
     "2701" = "Bandar-e-Gaz",
     "2702" = "Bandar-e-Torkaman",
     "2703" = "Aliabad",
@@ -485,7 +450,6 @@ hbsir.add_attributes <- function(df) {
     "2712" = "Maravehtapeh",
     "2713" = "Gomishan",
     "2714" = "Galikash",
-    # North Khorasan Province
     "2801" = "Esfarayen",
     "2802" = "Bojnurd",
     "2803" = "Jajrom",
@@ -498,7 +462,6 @@ hbsir.add_attributes <- function(df) {
     "2813" = "Faroj",
     "2824" = "Jajrom",
     "2825" = "Maneh-o-Samalqan",
-    # South Khorasan Province
     "2901" = "Birjand",
     "2902" = "Darmian",
     "2903" = "Birjand",
@@ -512,7 +475,6 @@ hbsir.add_attributes <- function(df) {
     "2911" = "Sarayan",
     "2912" = "Qaen",
     "2921" = "Nehbandan",
-    # Alborz Province
     "3001" = "Karaj",
     "3002" = "Savojbolagh",
     "3003" = "Nazarabad",
@@ -520,71 +482,82 @@ hbsir.add_attributes <- function(df) {
     "3005" = "Eshtehard",
     "3006" = "Fardis"
   )
-  #Ensure 'ID' has no missing values
-  if (any(is.na(df$ID))) {
-    stop("The 'ID' column contains missing values.")
+
+  # Extract codes vectorized
+  province_code <- substr(df$ID, 2, 3)
+  county_code <- substr(df$ID, 2, 5)
+  first_digit <- substr(df$ID, 1, 1)
+
+  # Assign Urban_Rural vectorized
+  df$Urban_Rural <- NA_character_
+  old_years_mask <- df$year >= 1363 & df$year <= 1386
+  df$Urban_Rural[old_years_mask] <- ifelse(first_digit[old_years_mask] == "0", "Rural",
+                                           ifelse(first_digit[old_years_mask] == "1", "Urban", NA_character_))
+  df$Urban_Rural[!old_years_mask] <- ifelse(first_digit[!old_years_mask] == "1", "Rural",
+                                            ifelse(first_digit[!old_years_mask] == "2", "Urban", NA_character_))
+
+  # Initialize Province and County
+  df$Province <- NA_character_
+  df$County <- NA_character_
+
+  # Direct mapping for years outside 1387-1391
+  direct_mask <- !(df$year >= 1387 & df$year <= 1391)
+  df$Province[direct_mask] <- province_codes[province_code[direct_mask]]
+  df$County[direct_mask] <- county_codes[county_code[direct_mask]]
+
+  # Warn if any unmatched in direct mapping
+  na_prov_direct <- direct_mask & is.na(df$Province)
+  if (any(na_prov_direct)) {
+    warning("Some province codes not found in mappings: ", paste(unique(province_code[na_prov_direct]), collapse = ", "))
   }
-  #Initialize columns
-  df$Province <- NA
-  df$County <- NA
-  df$Urban_Rural <- NA
-  #Loop over each row
-  for (i in 1:nrow(df)) {
-    id_value <- df$ID[i]
-    province_code <- substr(id_value, 2, 3)
-    county_code <- substr(id_value, 2, 5)
-    first_digit <- substr(id_value, 1, 1)
-    #Debugging: Log ID and extracted codes
-    message("Processing ID: ", id_value, ", Province Code: ", province_code, ", County Code: ", county_code)
-    #Assign Urban/Rural
-    if (df$year[i] >= 1363 && df$year[i] <= 1386) {
-      if (first_digit == "0") {
-        df$Urban_Rural[i] <- "Rural"
-      } else if (first_digit == "1") {
-        df$Urban_Rural[i] <- "Urban"
-      }
-    } else {
-      if (first_digit == "1") {
-        df$Urban_Rural[i] <- "Rural"
-      } else if (first_digit == "2") {
-        df$Urban_Rural[i] <- "Urban"
-      }
+  na_cnty_direct <- direct_mask & is.na(df$County)
+  if (any(na_cnty_direct)) {
+    warning("Some county codes not found in mappings: ", paste(unique(county_code[na_cnty_direct]), collapse = ", "))
+  }
+
+  # External data for years 1387-1391 (load only if needed)
+  ext_mask <- df$year >= 1387 & df$year <= 1391
+  if (any(ext_mask)) {
+    external_url <- "https://s3.ir-tbz-sh1.arvanstorage.ir/iran-open-data/EXTERNAL/hbsir_counties.parquet"
+    tryCatch({
+      external_data <- arrow::read_parquet(external_url)
+    }, error = function(e) {
+      stop("Failed to load external data: ", e$message)
+    })
+
+    if (!all(c("ID", "Region_Code") %in% colnames(external_data))) {
+      stop("External data is missing required columns: ID, Region_Code")
     }
-    #Assign Province and County
-    if (df$year[i] >= 1387 && df$year[i] <= 1391) {
-      #Use external data for 13871391
-      formatted_county_code <- sprintf("%04d", as.integer(county_code))
-      matched_row <- external_data[external_data$ID == formatted_county_code, ]
-      if (nrow(matched_row) > 0) {
-        region_code <- matched_row$Region_Code[1]
-        prov_code <- substr(region_code, 2, 3)
-        cnty_code <- substr(region_code, 2, 5)
-        if (prov_code %in% names(province_codes)) {
-          df$Province[i] <- province_codes[prov_code]
-        } else {
-          message("Province code not found in external data: ", prov_code)
-        }
-        if (cnty_code %in% names(county_codes)) {
-          df$County[i] <- county_codes[cnty_code]
-        } else {
-          message("County code not found in external data: ", cnty_code)
-        }
-      } else {
-        message("No match found for county_code: ", formatted_county_code)
-      }
-    } else {
-      #Use direct mapping for years outside 13871391
-      if (province_code %in% names(province_codes)) {
-        df$Province[i] <- province_codes[province_code]
-      } else {
-        message("Province code not found in mappings: ", province_code)
-      }
-      if (county_code %in% names(county_codes)) {
-        df$County[i] <- county_codes[county_code]
-      } else {
-        message("County code not found in mappings: ", county_code)
-      }
+
+    # Format and match
+    formatted_county <- sprintf("%04d", as.integer(county_code[ext_mask]))
+    match_idx <- match(formatted_county, external_data$ID)
+    matched_region <- external_data$Region_Code[match_idx]
+
+    # Warn if no match
+    na_match <- is.na(match_idx)
+    if (any(na_match)) {
+      warning("No match found for some county codes in external data: ", paste(formatted_county[na_match], collapse = ", "))
+    }
+
+    # Extract codes
+    prov_code_ext <- substr(matched_region, 2, 3)
+    cnty_code_ext <- substr(matched_region, 2, 5)
+
+    # Assign
+    df$Province[ext_mask] <- province_codes[prov_code_ext]
+    df$County[ext_mask] <- county_codes[cnty_code_ext]
+
+    # Warn if unmatched in mappings
+    na_prov_ext <- ext_mask & is.na(df$Province) & !is.na(match_idx)
+    if (any(na_prov_ext)) {
+      warning("Some province codes from external data not found in mappings: ", paste(unique(prov_code_ext[na_prov_ext]), collapse = ", "))
+    }
+    na_cnty_ext <- ext_mask & is.na(df$County) & !is.na(match_idx)
+    if (any(na_cnty_ext)) {
+      warning("Some county codes from external data not found in mappings: ", paste(unique(cnty_code_ext[na_cnty_ext]), collapse = ", "))
     }
   }
+
   return(df)
 }
